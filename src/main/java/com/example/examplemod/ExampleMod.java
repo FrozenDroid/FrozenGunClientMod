@@ -1,19 +1,26 @@
 package com.example.examplemod;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.OpenGlHelper;
+import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.opengl.GL11;
+
+import java.awt.*;
 
 @Mod(modid = ExampleMod.MODID, name = ExampleMod.NAME, version = ExampleMod.VERSION)
 public class ExampleMod
@@ -24,19 +31,18 @@ public class ExampleMod
 
     private static Logger logger;
 
-    @SubscribeEvent
-    public void test(PlayerEvent.ItemPickupEvent e) {
-        e.player.sendMessage(new TextComponentString(e.player.getName()));
-    }
-
-    @SubscribeEvent
-    public void test2(RenderGameOverlayEvent.Post e) {
-        GL11.glPushMatrix();
-        GL11.glEnable(GL11.GL_BLEND);
-        OpenGlHelper.glBlendFunc(770, 771, 1, 0);
-        Minecraft.getMinecraft().fontRenderer.drawStringWithShadow("Test!!", 10, 20, 0xffff | (120 << 24));
-        GL11.glDisable(GL11.GL_BLEND);
-        GL11.glPopMatrix();
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public void test2(RenderGameOverlayEvent.Text e) {
+        GlStateManager.enableBlend();
+        GlStateManager.tryBlendFuncSeparate(
+                GlStateManager.SourceFactor.SRC_ALPHA,
+                GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA,
+                GlStateManager.SourceFactor.ONE,
+                GlStateManager.DestFactor.ZERO
+        );
+        Color color = new Color(1f, 1f, 1f, 0.3f);
+        Minecraft.getMinecraft().fontRenderer.drawStringWithShadow("Test!!1", 10, 20, color.getRGB());
+        GlStateManager.disableBlend();
     }
 
     @EventHandler
@@ -51,7 +57,5 @@ public class ExampleMod
         // some example code
         logger.info("DIRT BLOCK >> {}", Blocks.DIRT.getRegistryName());
         MinecraftForge.EVENT_BUS.register(this);
-
-
     }
 }
